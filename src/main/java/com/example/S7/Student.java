@@ -1,22 +1,20 @@
 package com.example.S7;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+
 public class Student {
+
+  public int studentid;
   public String name;
+  public String furigana;
+  public String nickname;
+  public String emailaddress;
+  public String region;
   public int age;
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public int getAge() {
-    return age;
-  }
-
-  public void setAge(int age) {
-    this.age = age;
-  }
+  public String gender;
 }
+
