@@ -18,7 +18,6 @@ public class S7Application {
   private StudentRepository repository;
 
   public static void main(String[] args) {
-    //localhost:8080
     SpringApplication.run(S7Application.class, args);
   }
 
@@ -32,9 +31,3 @@ public class S7Application {
     return repository.AllStudentsCourses();
   }
 }
-
-
-
-
-
-
