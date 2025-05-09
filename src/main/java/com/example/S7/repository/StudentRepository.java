@@ -1,5 +1,4 @@
 package com.example.S7.repository;
-
 import com.example.S7.data.Student;
 import com.example.S7.data.StudentsCourses;
 import java.util.List;
@@ -14,6 +13,5 @@ public interface StudentRepository {
 
   @Select("SELECT * FROM Students_Courses")
   List<StudentsCourses> getAllStudentsCourses();
-
 
 }
