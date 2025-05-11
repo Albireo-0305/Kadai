@@ -23,11 +23,12 @@ public class S7Application {
 
   @GetMapping("/studentList")
   public List<Student> getStudentList() {
-    return repository.Allstudents();
+    return repository.getAllstudents();
   }
 
-  @GetMapping("/StudentsCoursesList")
-  public List<StudentsCourses> getStudentsCoursesList() {
-    return repository.AllStudentsCourses();
-  }
+
+	@GetMapping("/StudentsCoursesList")
+	public List<StudentsCourses> getStudentsCoursesList() {
+		return repository.getAllStudentsCourses();
+	}
 }
