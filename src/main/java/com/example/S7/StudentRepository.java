@@ -1,7 +1,5 @@
-package com.example.S7.repository;
+package com.example.S7;
 
-import com.example.S7.data.Student;
-import com.example.S7.data.StudentsCourses;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -14,6 +12,5 @@ public interface StudentRepository {
 
   @Select("SELECT * FROM Students_Courses")
   List<StudentsCourses> getAllStudentsCourses();
-
 
 }

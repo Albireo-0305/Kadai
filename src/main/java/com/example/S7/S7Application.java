@@ -18,23 +18,16 @@ public class S7Application {
   private StudentRepository repository;
 
   public static void main(String[] args) {
-    //localhost:8080
     SpringApplication.run(S7Application.class, args);
   }
 
   @GetMapping("/studentList")
   public List<Student> getStudentList() {
-    return repository.Allstudents();
+    return repository.getAllstudents();
   }
 
   @GetMapping("/StudentsCoursesList")
   public List<StudentsCourses> getStudentsCoursesList() {
-    return repository.AllStudentsCourses();
+    return repository.getAllStudentsCourses();
   }
 }
-
-
-
-
-
-
