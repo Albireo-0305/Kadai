@@ -26,9 +26,8 @@ public class S7Application {
     return repository.getAllstudents();
   }
 
-
-	@GetMapping("/StudentsCoursesList")
-	public List<StudentsCourses> getStudentsCoursesList() {
-		return repository.getAllStudentsCourses();
-	}
+  @GetMapping("/StudentsCoursesList")
+  public List<StudentsCourses> getStudentsCoursesList() {
+    return repository.getAllStudentsCourses();
+  }
 }
