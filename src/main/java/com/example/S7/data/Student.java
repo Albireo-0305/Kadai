@@ -16,6 +16,8 @@ public class Student {
   public String region;
   public int age;
   public String gender;
+  public String remark;
+  public boolean isDeleted;
 
 }
 
