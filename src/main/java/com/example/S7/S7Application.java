@@ -12,6 +12,4 @@ public class S7Application {
 
     SpringApplication.run(S7Application.class, args);
   }
-
-
 }
