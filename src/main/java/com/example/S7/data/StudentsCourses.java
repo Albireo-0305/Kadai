@@ -12,7 +12,7 @@ public class StudentsCourses {
   public int courseId;
   public int studentId;
   public String courseName;
-  public Date StartDate;
-  public Date ExpectedendDate;
+  public Date startDate;
+  public Date expectedEndDate;
 
 }
