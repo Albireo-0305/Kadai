@@ -6,9 +6,7 @@ import com.example.S7.data.StudentsCourses;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.service.StudentService;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import java.util.Date;
 
@@ -37,7 +36,7 @@ public class StudentController {
   @GetMapping("/studentList")
   public String getStudentList(Model model) {
     List<Student> students = service.searchStudentList();
-    List<StudentsCourses> studentsCourses = service.serchStudentsCoursesList();
+    List<StudentsCourses> studentsCourses = service.searchStudentsCoursesList();
 
     model.addAttribute("studentList",
         converter.convertStudentDetails(students, studentsCourses));//こっちstudentListはテンプレートの名前
@@ -47,7 +46,7 @@ public class StudentController {
 
   @GetMapping("/StudentsCoursesList")
   public List<StudentsCourses> getStudentsCoursesList() {
-    return service.serchStudentsCoursesList();
+    return service.searchStudentsCoursesList();
   }
 
   @InitBinder
@@ -72,13 +71,33 @@ public class StudentController {
       return "registerStudent";
     }
     //新規受講生情報を登録する処理の実装
-    Student savedStudent = service.saveStudent(studentDetail.getStudent());
+    Student insertStudent = service.insertStudent(studentDetail.getStudent());
     //コース情報も一緒に登録できるようにする。新規で複数コースは考えにくいので単体でよい
-    service.saveStudentWithCourse(studentDetail);
+    service.insertStudentWithCourse(studentDetail);
 
     return "redirect:/studentList";
 
   }
+
+  @GetMapping("/editStudent/{id}")
+  public String editStudentForm(@PathVariable("id") int studentId, Model model) {
+    Student student = service.findStudentById(studentId);
+    StudentsCourses course = service.findCourseByStudentId(studentId);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentsCourses(List.of(course));
+
+    model.addAttribute("studentDetail", detail);
+    return "editStudent";
+  }
+
+  @PostMapping("/updateStudent")
+  public String updateStudent(@ModelAttribute StudentDetail studentDetail) {
+    service.updateStudentWithCourse(studentDetail);
+    return "redirect:/studentList";
+  }
+
 
 }
 
