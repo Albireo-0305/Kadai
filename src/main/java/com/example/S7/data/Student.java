@@ -5,19 +5,19 @@ import lombok.Setter;
 
 @Getter
 @Setter
-
 public class Student {
 
-  public int studentId;
-  public String name;
-  public String furigana;
-  public String nickName;
-  public String emailAddress;
-  public String region;
-  public int age;
-  public String gender;
-  public String remark;
-  public boolean isDeleted;
-
+  private int studentId;
+  private String name;
+  private String furigana;
+  private String nickName;
+  private String emailAddress;
+  private String region;
+  private int age;
+  private String gender;
+  private String remark;
+  private boolean deleted;//LombokだとisDeleted に対して isIsDeleted() を自動生成してしまうので変更
 }
+
+
 

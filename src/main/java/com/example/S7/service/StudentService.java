@@ -67,7 +67,9 @@ public class StudentService {
       repository.updateCourse(course);
     }
   }
+
   public Student findStudentById(int studentId) {
+
     return repository.findStudentById(studentId);
   }
 
