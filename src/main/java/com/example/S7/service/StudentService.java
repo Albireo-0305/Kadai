@@ -7,6 +7,7 @@ import com.example.S7.repository.StudentRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StudentService {
@@ -22,19 +23,21 @@ public class StudentService {
     return repository.getAllstudents();
   }
 
-  public List<StudentsCourses> serchStudentsCoursesList() {
+  public List<StudentsCourses> searchStudentsCoursesList() {
     return repository.getAllStudentsCourses();
 
 
   }
 
   //保存用のメソッドを追加
-  public Student saveStudent(Student student) {
+  @Transactional//必ず
+  public Student insertStudent(Student student) {
     repository.insertStudent(student);
     return student;
   }
 
-  public void saveStudentWithCourse(StudentDetail studentDetail) {
+  @Transactional
+  public void insertStudentWithCourse(StudentDetail studentDetail) {
     List<StudentsCourses> courses = studentDetail.getStudentsCourses();
     if (courses != null && !courses.isEmpty()) {
       StudentsCourses course = courses.get(0);
@@ -43,4 +46,32 @@ public class StudentService {
     }
   }
 
+  public StudentDetail findStudentDetailById(int studentId) {
+    Student student = repository.findStudentById(studentId);
+    List<StudentsCourses> courses = repository.findCoursesByStudentId(studentId);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentsCourses(courses);
+
+    return detail;
+  }
+
+  public void updateStudentWithCourse(StudentDetail studentDetail) {
+    Student student = studentDetail.getStudent();
+    repository.updateStudent(student);
+
+    List<StudentsCourses> courses = studentDetail.getStudentsCourses();
+    if (courses != null && !courses.isEmpty()) {
+      StudentsCourses course = courses.get(0);
+      repository.updateCourse(course);
+    }
+  }
+  public Student findStudentById(int studentId) {
+    return repository.findStudentById(studentId);
+  }
+
+  public StudentsCourses findCourseByStudentId(int studentId) {
+    return repository.findCourseByStudentId(studentId);
+  }
 }
