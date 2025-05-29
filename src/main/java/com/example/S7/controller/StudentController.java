@@ -5,50 +5,33 @@ import com.example.S7.data.Student;
 import com.example.S7.data.StudentsCourses;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.service.StudentService;
-import java.text.SimpleDateFormat;
-import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import java.util.Date;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * 受講生の登録・検索・更新を行う REST API コントローラーです。
+ */
 @RestController
 public class StudentController {
 
-  public StudentService service;
-  public StudentConverter converter;
+  private final StudentService service;
 
   @Autowired
-  public StudentController(StudentService service, StudentConverter converter) {
+  public StudentController(StudentService service) {
     this.service = service;
-    this.converter = converter;
   }
 
-
-  @GetMapping("/studentList")
-  public List<StudentDetail>getStudentList() {
-    List<Student> students = service.searchStudentList();
-    List<StudentsCourses> studentsCourses = service.searchStudentsCoursesList();
-    return  converter.convertStudentDetails(students, studentsCourses);
-  }
-
-
-  @GetMapping("/StudentsCoursesList")
-  public List<StudentsCourses> getStudentsCoursesList() {
-    return service.searchStudentsCoursesList();
-  }
-
+  /**
+   * 日付の形式（yyyy-MM-dd）をバインド用に設定します。
+   */
   @InitBinder
   public void initBinder(WebDataBinder binder) {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -56,31 +39,37 @@ public class StudentController {
     binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
   }
 
-
-  @GetMapping("newStudent")
-  public String newStudent(Model model) {
-    model.addAttribute("studentDetail", new StudentDetail());
-    return "registerStudent";
+  /**
+   * 受講生の全件一覧を取得します。
+   *
+   * @return 受講生のリスト
+   */
+  @GetMapping("/studentList")
+  public List<StudentDetail> getStudentList() {
+    return service.searchStudentList();
   }
 
-  @PostMapping("registerStudent")
-  public String registerStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
-    if (result.hasErrors()) {
-      System.out.println("Validation errors found:");
-      result.getAllErrors().forEach(e -> System.out.println(e.toString()));
-      return "registerStudent";
-    }
-    //新規受講生情報を登録する処理の実装
-    Student insertStudent = service.insertStudent(studentDetail.getStudent());
-    //コース情報も一緒に登録できるようにする。新規で複数コースは考えにくいので単体でよい
-    service.insertStudentWithCourse(studentDetail);
-
-    return "redirect:/studentList";
-
+  /**
+   * 新しい受講生を登録します。
+   *
+   * @param studentDetail 登録する受講生の詳細情報
+   * @return 登録後の受講生詳細情報
+   */
+  @PostMapping("/registerStudent")
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail) {
+    // 学生情報とコース情報を登録
+    StudentDetail responseStudentDetail = service.insertStudentWithCourse(studentDetail);
+    return ResponseEntity.ok(responseStudentDetail);
   }
 
+  /**
+   * 指定されたIDの受講生情報を取得します（編集用）。
+   *
+   * @param studentId 学生ID
+   * @return 学生詳細情報
+   */
   @GetMapping("/editStudent/{id}")
-  public String editStudentForm(@PathVariable("id") int studentId, Model model) {
+  public ResponseEntity<StudentDetail> getStudentDetail(@PathVariable("id") int studentId) {
     Student student = service.findStudentById(studentId);
     StudentsCourses course = service.findCourseByStudentId(studentId);
 
@@ -88,16 +77,21 @@ public class StudentController {
     detail.setStudent(student);
     detail.setStudentsCourses(List.of(course));
 
-    model.addAttribute("studentDetail", detail);
-    return "editStudent";
+    return ResponseEntity.ok(detail);
   }
 
+  /**
+   * 受講生情報を更新します。
+   *
+   * @param studentDetail 更新する学生の詳細情報
+   * @return 成功メッセージ
+   */
   @PostMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
     service.updateStudentWithCourse(studentDetail);
     return ResponseEntity.ok("更新が成功しました。");
   }
-
-
 }
 
+//リファクタリング箇所
+// insertStudent()が重複で使っていなさそうなので削除しました。
