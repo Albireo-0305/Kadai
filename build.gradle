@@ -33,6 +33,8 @@ dependencies {
     //thymeleaf
 	implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
 
+	//Validation
+	implementation('org.springframework.boot:spring-boot-starter-validation')
 	//mySQLドライバ
 	runtimeOnly('com.mysql:mysql-connector-j')
 	//Lombok

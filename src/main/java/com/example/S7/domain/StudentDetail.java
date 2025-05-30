@@ -1,7 +1,7 @@
 package com.example.S7.domain;
 
 import com.example.S7.data.Student;
-import com.example.S7.data.StudentsCourses;
+import com.example.S7.data.StudentCourse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,7 +27,7 @@ public class StudentDetail {
   /**
    * 学生が登録しているコースのリストです。
    */
-  private List<StudentsCourses> studentsCourses;
+  private List<StudentCourse> studentCourseList;
 }
 
 
