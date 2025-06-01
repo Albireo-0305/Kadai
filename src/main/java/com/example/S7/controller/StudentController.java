@@ -8,7 +8,10 @@ import com.example.S7.service.StudentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -75,7 +78,7 @@ public class StudentController {
    * @return 学生詳細情報
    */
   @GetMapping("/editStudent/{id}")
-  public ResponseEntity<StudentDetail> getStudentDetail(@PathVariable("id") @Min(1) @Max(999999999)  int studentId) {
+  public ResponseEntity<StudentDetail> getStudentDetail(@PathVariable("id") @Min(1) @Max(999999999) @NotNull int studentId) {
     Student student = service.findStudentById(studentId);
     StudentCourse course = service.findCourseByStudentId(studentId);
 
