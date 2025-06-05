@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.S7.repository.StudentRepository">
+
+  <!-- 全受講生（論理削除されていない） -->
+  <select id="search" resultType="com.example.S7.data.Student">
+    SELECT * FROM students WHERE is_deleted = FALSE
+  </select>
+
+  <!-- すべてのコース情報 -->
+  <select id="getAllStudentsCourses" resultType="com.example.S7.data.StudentCourse">
+    SELECT * FROM students_courses
+  </select>
+
+  <!-- 指定IDの受講生 -->
+  <select id="findStudentById" resultType="com.example.S7.data.Student">
+    SELECT * FROM students WHERE student_id = #{studentId}
+  </select>
+
+  <!-- 指定IDの受講生の1番目コース -->
+  <select id="findCourseByStudentId" resultType="com.example.S7.data.StudentCourse">
+    SELECT * FROM students_courses WHERE student_id = #{studentId} LIMIT 1
+  </select>
+
+  <!-- 指定IDの受講生の全コース -->
+  <select id="findCoursesByStudentId" resultType="com.example.S7.data.StudentCourse">
+    SELECT * FROM students_courses WHERE student_id = #{studentId}
+  </select>
+
+  <!-- 受講生登録 -->
+  <insert id="insertStudent" useGeneratedKeys="true" keyProperty="studentId">
+    INSERT INTO students (
+    name, furigana, nickname, email_address, region, age, gender, remark, is_deleted
+    ) VALUES (
+    #{name}, #{furigana}, #{nickName}, #{emailAddress}, #{region}, #{age}, #{gender}, #{remark}, 0
+    )
+  </insert>
+
+  <!-- コース登録 -->
+  <insert id="insertCourse">
+    INSERT INTO students_courses (
+    student_id, course_name, start_date, expected_end_date
+    ) VALUES (
+    #{studentId}, #{courseName}, #{startDate}, #{expectedEndDate}
+    )
+  </insert>
+
+  <!-- 受講生更新 -->
+  <update id="updateStudent">
+    UPDATE students SET
+    name = #{name}, furigana = #{furigana}, nickname = #{nickName}, email_address = #{emailAddress},
+    region = #{region}, age = #{age}, gender = #{gender}, remark = #{remark}, is_deleted = #{deleted}
+    WHERE student_id = #{studentId}
+  </update>
+
+  <!-- コース更新 -->
+  <update id="updateCourse">
+    UPDATE students_courses SET
+    course_name = #{courseName}, expected_end_date = #{expectedEndDate}
+    WHERE course_id = #{courseId}
+  </update>
+
+</mapper>

@@ -1,14 +1,19 @@
 package com.example.S7.controller;
 
-import com.example.S7.controller.converter.StudentConverter;
 import com.example.S7.data.Student;
-import com.example.S7.data.StudentsCourses;
+import com.example.S7.data.StudentCourse;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.service.StudentService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +24,7 @@ import java.util.List;
 /**
  * 受講生の登録・検索・更新を行う REST API コントローラーです。
  */
+@Validated
 @RestController
 public class StudentController {
 
@@ -69,25 +75,25 @@ public class StudentController {
    * @return 学生詳細情報
    */
   @GetMapping("/editStudent/{id}")
-  public ResponseEntity<StudentDetail> getStudentDetail(@PathVariable("id") int studentId) {
+  public ResponseEntity<StudentDetail> getStudentDetail(@PathVariable("id") @Min(1) @Max(999999999)  int studentId) {
     Student student = service.findStudentById(studentId);
-    StudentsCourses course = service.findCourseByStudentId(studentId);
+    StudentCourse course = service.findCourseByStudentId(studentId);
 
     StudentDetail detail = new StudentDetail();
     detail.setStudent(student);
-    detail.setStudentsCourses(List.of(course));
+    detail.setStudentCourseList(List.of(course));
 
     return ResponseEntity.ok(detail);
   }
 
   /**
-   * 受講生情報を更新します。
+   * 受講生情報を更新します。キャンセルフラグの更新もここで行います。(論理削除)
    *
    * @param studentDetail 更新する学生の詳細情報
    * @return 成功メッセージ
    */
-  @PostMapping("/updateStudent")
-  public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
+  @PutMapping("/updateStudent")
+  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
     service.updateStudentWithCourse(studentDetail);
     return ResponseEntity.ok("更新が成功しました。");
   }

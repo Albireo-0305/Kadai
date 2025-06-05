@@ -2,7 +2,7 @@ package com.example.S7.service;
 
 import com.example.S7.controller.converter.StudentConverter;
 import com.example.S7.data.Student;
-import com.example.S7.data.StudentsCourses;
+import com.example.S7.data.StudentCourse;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.repository.StudentRepository;
 
@@ -31,9 +31,9 @@ public class StudentService {
    * 受講生の全件一覧を取得します。
    */
   public List<StudentDetail> searchStudentList() {
-    List<Student> studentList = repository.getAllStudents();
-    List<StudentsCourses> studentsCoursesList = repository.getAllStudentsCourses();
-    return converter.convertStudentDetails(studentList, studentsCoursesList);
+    List<Student> studentList = repository.search();
+    List<StudentCourse> studentCourseList = repository.getAllStudentsCourses();
+    return converter.convertStudentDetails(studentList, studentCourseList);
   }
 
   /**
@@ -53,9 +53,9 @@ public class StudentService {
     Student student = studentDetail.getStudent();
     repository.insertStudent(student);
 
-    List<StudentsCourses> courses = studentDetail.getStudentsCourses();
+    List<StudentCourse> courses = studentDetail.getStudentCourseList();
     if (courses != null && !courses.isEmpty()) {
-      StudentsCourses course = courses.get(0);
+      StudentCourse course = courses.get(0);
       course.setStudentId(student.getStudentId());
       repository.insertCourse(course);
     }
@@ -68,7 +68,7 @@ public class StudentService {
    */
   public StudentDetail findStudentDetailById(int studentId) {
     Student student = repository.findStudentById(studentId);
-    List<StudentsCourses> courses = repository.findCoursesByStudentId(studentId);
+    List<StudentCourse> courses = repository.findCoursesByStudentId(studentId);
     return new StudentDetail(student, courses);
   }
 
@@ -80,9 +80,9 @@ public class StudentService {
     Student student = studentDetail.getStudent();
     repository.updateStudent(student);
 
-    List<StudentsCourses> courses = studentDetail.getStudentsCourses();
+    List<StudentCourse> courses = studentDetail.getStudentCourseList();
     if (courses != null && !courses.isEmpty()) {
-      StudentsCourses course = courses.get(0);
+      StudentCourse course = courses.get(0);
       repository.updateCourse(course);
     }
   }
@@ -97,7 +97,7 @@ public class StudentService {
   /**
    * 学生に紐づくコース情報を1件取得します。
    */
-  public StudentsCourses findCourseByStudentId(int studentId) {
+  public StudentCourse findCourseByStudentId(int studentId) {
     return repository.findCourseByStudentId(studentId);
   }
 }
