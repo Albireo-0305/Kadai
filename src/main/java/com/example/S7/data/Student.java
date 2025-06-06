@@ -1,5 +1,6 @@
 package com.example.S7.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+@Schema(description = "受講生")
 @Getter
 @Setter
 public class Student {
@@ -15,13 +17,13 @@ public class Student {
   private int studentId;
 
   @NotBlank
-  @Size(max = 100,min = 1)
+  @Size(max = 100, min = 1)
   private String name;
 
   @NotBlank
   private String furigana;
 
-  @Size(min = 1,max = 100)
+  @Size(min = 1, max = 100)
   private String nickName;
 
   @Email
