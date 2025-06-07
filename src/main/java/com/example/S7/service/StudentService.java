@@ -4,6 +4,7 @@ import com.example.S7.controller.converter.StudentConverter;
 import com.example.S7.data.Student;
 import com.example.S7.data.StudentCourse;
 import com.example.S7.domain.StudentDetail;
+import com.example.S7.exception.StudentNotFoundException;
 import com.example.S7.repository.StudentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,11 +89,16 @@ public class StudentService {
   }
 
   /**
-   * 学生情報のみを取得します。
+   * 学生情報のみを取得します（存在しない場合は例外をスロー）。
    */
   public Student findStudentById(int studentId) {
-    return repository.findStudentById(studentId);
+    Student student = repository.findStudentById(studentId);
+    if (student == null) {
+      throw new StudentNotFoundException("ID " + studentId + " の学生は存在しません。");
+    }
+    return student;
   }
+
 
   /**
    * 学生に紐づくコース情報を1件取得します。
@@ -100,6 +106,7 @@ public class StudentService {
   public StudentCourse findCourseByStudentId(int studentId) {
     return repository.findCourseByStudentId(studentId);
   }
+
 }
 
 //リファクタリング箇所
