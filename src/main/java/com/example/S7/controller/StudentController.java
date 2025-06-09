@@ -5,14 +5,12 @@ import com.example.S7.data.StudentCourse;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.service.StudentService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +51,7 @@ public class StudentController {
    *
    * @return 受講生のリスト
    */
+  @Operation(summary = "一覧検索", description = "受講生の一覧を検索します。")
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList() {
     return service.searchStudentList();
@@ -64,6 +63,7 @@ public class StudentController {
    * @param studentDetail 登録する受講生の詳細情報
    * @return 登録後の受講生詳細情報
    */
+  @Operation(summary = "受講生登録", description = "受講生を登録します。")
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail) {
     // 学生情報とコース情報を登録
@@ -72,13 +72,15 @@ public class StudentController {
   }
 
   /**
-   * 指定されたIDの受講生情報を取得します（編集用）。
+   * 指定されたIDの受講生情報を取得します。
    *
    * @param studentId 学生ID
    * @return 学生詳細情報
    */
+  @Operation(summary = "受講生情報取得", description = "指定されたIDの受講生とコースの情報を取得します。")
   @GetMapping("/editStudent/{id}")
-  public ResponseEntity<StudentDetail> getStudentDetail(@PathVariable("id") @Min(1) @Max(999999999) @NotNull int studentId) {
+  public ResponseEntity<StudentDetail> getStudentDetail(
+      @PathVariable("id") @Min(1) @Max(999999999) @NotNull int studentId) {
     Student student = service.findStudentById(studentId);
     StudentCourse course = service.findCourseByStudentId(studentId);
 
@@ -95,6 +97,7 @@ public class StudentController {
    * @param studentDetail 更新する学生の詳細情報
    * @return 成功メッセージ
    */
+  @Operation(summary = "受講生情報更新", description = "受講生とそのコース情報を更新します。")
   @PutMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
     service.updateStudentWithCourse(studentDetail);
