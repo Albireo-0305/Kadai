@@ -69,7 +69,7 @@ class StudentServiceTest {
   @Test
   void insertStudentWithCourse_学生とコースを登録できること() {
     Student student = new Student();
-    student.setStudentId(1);
+    student.setStudentId("1");
     StudentCourse course = new StudentCourse();
     List<StudentCourse> courseList = List.of(course);
     StudentDetail detail = new StudentDetail(student, courseList);

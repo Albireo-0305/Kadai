@@ -12,9 +12,9 @@ import lombok.Setter;
 @Setter
 public class StudentCourse {
 
-  public int courseId;
+  public String courseId;
 
-  public int studentId;
+  public String studentId;
 
   @NotBlank
   public String courseName;

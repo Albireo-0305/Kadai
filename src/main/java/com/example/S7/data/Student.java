@@ -2,9 +2,8 @@ package com.example.S7.data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,9 @@ import lombok.Setter;
 @Setter
 public class Student {
 
-  private int studentId;
+  @NotBlank
+  @Pattern(regexp = "\\d+", message = "数字のみを入力してください。")
+  private String studentId;
 
   @NotBlank
   @Size(max = 100, min = 1)
@@ -32,8 +33,6 @@ public class Student {
 
   private String region;
 
-  @Min(1)
-  @Max(150)
   private int age;
 
   private String gender;
