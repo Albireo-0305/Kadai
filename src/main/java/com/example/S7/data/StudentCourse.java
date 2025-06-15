@@ -16,13 +16,13 @@ public class StudentCourse {
 
   public String studentId;
 
-  @NotBlank
+  @NotBlank(message = "コース名を入力してください。")
   public String courseName;
 
-  @NotNull
+  @NotNull(message = "開始日を入力してください。")
   public Date startDate;
 
-  @NotNull
+  @NotNull(message = "終了予定日を入力してください。")
   public Date expectedEndDate;
 
 }
