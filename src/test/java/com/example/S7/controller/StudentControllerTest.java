@@ -23,11 +23,13 @@ import jakarta.validation.Validator;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 
 @WebMvcTest(StudentController.class)
 class StudentControllerTest {
@@ -41,6 +43,7 @@ class StudentControllerTest {
   private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
   @Test
+  @DisplayName("受講生詳細の一覧検索テスト")
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
     when(service.searchStudentList()).thenReturn(List.of(new StudentDetail()));
 
@@ -140,6 +143,7 @@ class StudentControllerTest {
     mockMvc.perform(get("/editStudent/3"))
         .andExpect(status().isOk());
   }
+
 
   //updateStudent のPUT（更新）
   @Test
