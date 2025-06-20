@@ -1,5 +1,7 @@
-CREATE TABLE students (
-    student_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+SET MODE MYSQL;
+
+CREATE TABLE IF NOT EXISTS students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255),
     furigana VARCHAR(100),
     nickname VARCHAR(100),
@@ -11,8 +13,8 @@ CREATE TABLE students (
     is_deleted BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE students_courses (
-    course_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS students_courses (
+    course_id INT PRIMARY KEY AUTO_INCREMENT,
     student_id INT,
     course_name VARCHAR(100),
     start_date DATE,
