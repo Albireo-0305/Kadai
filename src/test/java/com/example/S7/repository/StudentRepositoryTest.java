@@ -38,5 +38,62 @@ class StudentRepositoryTest {
     assertThat(actual.size()).isEqualTo(8);
 
   }
+
+  @Test
+  void 指定のIDの受講生を取得できること() {
+    Student student = sut.findStudentById(1);
+    assertThat(student.getName()).isEqualTo("武藤 遊戯");
+  }
+
+  @Test
+  void 全てのコース情報が取得できること() {
+    List<StudentCourse> courses = sut.getAllStudentsCourses();
+    assertThat(courses).isNotEmpty();
+  }
+
+  @Test
+  void 指定IDの受講生のコースが取得できること() {
+    StudentCourse actual = sut.findCourseByStudentId(2);
+    assertThat(actual).isNotNull();
+    assertThat(actual.getCourseName()).isEqualTo("超融合理論");
+  }
+
+  @Test
+  void コースを登録できること() {
+    StudentCourse course = new StudentCourse();
+    course.setStudentId("1");
+    course.setCourseName("闇のゲーム理論");
+    course.setStartDate(new Date());
+    course.setExpectedEndDate(new Date());
+
+    sut.insertCourse(course);
+
+    List<StudentCourse> courses = sut.findCoursesByStudentId(1);
+    assertThat(courses).extracting("courseName").contains("闇のゲーム理論");
+
+  }
+
+  @Test
+  void 受講生情報を更新できること() {
+    Student student = sut.findStudentById(1);
+    student.setNickName("闇遊戯");
+
+    sut.updateStudent(student);
+
+    Student updated = sut.findStudentById(1);
+    assertThat(updated.getNickName()).isEqualTo("闇遊戯");
+  }
+
+  @Test
+  void コース情報の更新ができること() {
+    List<StudentCourse> courses = sut.findCoursesByStudentId(2);
+    StudentCourse course = courses.get(0);
+    course.setCourseName("超越融合");
+
+    sut.updateCourse(course);
+
+    StudentCourse updated = sut.findCourseByStudentId(2);
+    assertThat(updated.getCourseName()).isEqualTo("超越融合");
+  }
 }
 
