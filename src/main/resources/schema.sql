@@ -2,10 +2,10 @@ SET MODE MYSQL;
 
 CREATE TABLE IF NOT EXISTS students (
     student_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    furigana VARCHAR(100),
+    name VARCHAR(255)　 NOT NULL,
+    furigana VARCHAR(100)　 NOT NULL,
     nickname VARCHAR(100),
-    email_address VARCHAR(100),
+    email_address VARCHAR(100)　 NOT NULL,
     region VARCHAR(100),
     age INT,
     gender VARCHAR(10),

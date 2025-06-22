@@ -95,5 +95,34 @@ class StudentRepositoryTest {
     StudentCourse updated = sut.findCourseByStudentId(2);
     assertThat(updated.getCourseName()).isEqualTo("超越融合");
   }
+
+  //異常系
+  @Test
+  void 存在してないIDで検索したときnullが返ってくること() {
+    Student result = sut.findStudentById(9999);
+    assertThat(result).isNull();
+  }
+
+  @Test
+  void 必須項目のフリガナが抜けていたら登録できないこと() {
+    Student student = new Student();
+    student.setName("切札　勝舞");
+    student.setNickName("しょうちゃん");
+    student.setEmailAddress("duel@masters.com");
+
+    assertThrows(Exception.class, () -> sut.insertStudent(student));
+  }
+
+  @Test
+  void 存在しないIDを更新しようとした時に更新件数が0件になること() {
+    Student student = new Student();
+    student.setStudentId("9999");
+    student.setName("切札　勝舞");
+    student.setNickName("しょうちゃん");
+    student.setEmailAddress("duel@masters.com");
+
+    int updated = sut.updateStudent(student);
+    assertThat(updated).isEqualTo(0);
+  }
 }
 
