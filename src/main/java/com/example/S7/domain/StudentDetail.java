@@ -33,6 +33,16 @@ public class StudentDetail {
    */
   @Valid
   private List<StudentCourse> studentCourseList;
+
+  /**
+   * 申込状況を受け取る＆返すためのステータスです。
+   */
+  private String status; // 申込状況（仮申込・本申込・受講中・受講終了）
+
+  public StudentDetail(Student student, List<StudentCourse> studentCourseList) {
+    this.student = student;
+    this.studentCourseList = studentCourseList;
+  }
 }
 
 

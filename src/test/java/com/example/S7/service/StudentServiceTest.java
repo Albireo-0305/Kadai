@@ -1,13 +1,17 @@
 package com.example.S7.service;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.example.S7.ApplicationStatus;
 import com.example.S7.controller.converter.StudentConverter;
 import com.example.S7.data.Student;
 import com.example.S7.data.StudentCourse;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.exception.StudentNotFoundException;
+import com.example.S7.repository.ApplicationStatusMapper;
 import com.example.S7.repository.StudentRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +34,13 @@ class StudentServiceTest {
 
   private StudentService sut;
 
+  @Mock
+  private ApplicationStatusMapper statusMapper;
+
+
   @BeforeEach
   void before() {
-    sut = new StudentService(repository, converter);
+    sut = new StudentService(repository, converter, statusMapper);
   }
 
   @Test
@@ -42,8 +50,8 @@ class StudentServiceTest {
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
 
-    Mockito.when(repository.search()).thenReturn(studentList);
-    Mockito.when(repository.getAllStudentsCourses()).thenReturn(studentCourseList);
+    when(repository.search()).thenReturn(studentList);
+    when(repository.getAllStudentsCourses()).thenReturn(studentCourseList);
 
     //実行
     List<StudentDetail> actual = sut.searchStudentList();
@@ -69,7 +77,7 @@ class StudentServiceTest {
   @Test
   void insertStudentWithCourse_学生とコースを登録できること() {
     Student student = new Student();
-    student.setStudentId("1");
+    student.setStudentId(1);
     StudentCourse course = new StudentCourse();
     List<StudentCourse> courseList = List.of(course);
     StudentDetail detail = new StudentDetail(student, courseList);
@@ -87,8 +95,8 @@ class StudentServiceTest {
     Student student = new Student();
     List<StudentCourse> courseList = List.of(new StudentCourse());
 
-    Mockito.when(repository.findStudentById(1)).thenReturn(student);
-    Mockito.when(repository.findCoursesByStudentId(1)).thenReturn(courseList);
+    when(repository.findStudentById(1)).thenReturn(student);
+    when(repository.findCoursesByStudentId(1)).thenReturn(courseList);
 
     StudentDetail result = sut.findStudentDetailById(1);
 
@@ -100,7 +108,7 @@ class StudentServiceTest {
   void findStudentById_存在する場合はそのまま返ってくる() {
     Student student = new Student();
 
-    Mockito.when(repository.findStudentById(1)).thenReturn(student);
+    when(repository.findStudentById(1)).thenReturn(student);
 
     Assertions.assertEquals(student, sut.findStudentById(1));
   }
@@ -108,7 +116,7 @@ class StudentServiceTest {
   @Test
   void findStudentById_存在しない場合は例外がスローされる() {
 
-    Mockito.when(repository.findStudentById(1)).thenReturn(null);
+    when(repository.findStudentById(1)).thenReturn(null);
 
     Assertions.assertThrows(StudentNotFoundException.class, () -> sut.findStudentById(1));
   }
@@ -130,8 +138,121 @@ class StudentServiceTest {
   void findCourseByStudentId_正しいコース情報が返ってくる() {
     StudentCourse course = new StudentCourse();
 
-    Mockito.when(repository.findCourseByStudentId(1)).thenReturn(course);
+    when(repository.findCourseByStudentId(1)).thenReturn(course);
 
     Assertions.assertEquals(course, sut.findCourseByStudentId(1));
+  }
+
+  @Test
+  void 申し込みの状況が登録されること() {
+    Student student = new Student();
+    student.setStudentId(777);
+
+    StudentCourse course = new StudentCourse();
+    course.setCourseId(888);
+    List<StudentCourse> courseList = List.of(course);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(courseList);
+    detail.setStatus("仮申込");
+
+    //リポジトリをセット
+    when(repository.insertStudent(student)).thenReturn(1); // ← int戻り値を設定
+    doNothing().when(repository).insertCourse(course);
+
+    sut.insertStudentWithCourse(detail);
+
+    verify(statusMapper).insert(Mockito.argThat(status ->
+        status.getStudentId() == 777 &&
+            status.getCourseId() == 888 &&
+            status.getStatus().equals("仮申込")
+    ));
+  }
+
+  @Test
+  void 申し込み状況が更新されること() {
+
+    Student student = new Student();
+    student.setStudentId(222);
+
+    StudentCourse course = new StudentCourse();
+    course.setCourseId(333);
+    List<StudentCourse> courseList = List.of(course);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(courseList);
+    detail.setStatus("受講中");
+
+    ApplicationStatus existingStatus = new ApplicationStatus();
+    existingStatus.setStudentId(222);
+    existingStatus.setCourseId(333);
+    existingStatus.setStatus("仮申込");
+
+    //モックの戻り値
+    when(statusMapper.findStatus(222, 333)).thenReturn(existingStatus);
+
+    sut.updateStudentWithCourse(detail);
+
+    verify(statusMapper).update(Mockito.argThat(status ->
+        status.getStudentId() == 222 &&
+            status.getCourseId() == 333 &&
+            status.getStatus().equals("受講中")));
+  }
+
+  //異常系テスト
+  @Test
+  void statusがnull状態なら登録されないこと() {
+    Student student = new Student();
+    student.setStudentId(999);
+
+    StudentCourse course = new StudentCourse();
+    course.setCourseId(888);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(List.of(course));
+    detail.setStatus(null);
+
+    sut.insertStudentWithCourse(detail);
+
+    verify(statusMapper, Mockito.never()).insert(Mockito.any());
+  }
+
+  @Test
+  void courseListが空ならstatus登録されないこと() {
+    Student student = new Student();
+    student.setStudentId(999);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(new ArrayList<>());//空のリストをいれる
+    detail.setStatus("仮申込");
+
+    sut.insertStudentWithCourse(detail);
+
+    verify(statusMapper, Mockito.never()).insert(Mockito.any());
+  }
+
+  @Test
+  void ステータスが空なら更新しないこと() {
+    Student student = new Student();
+    student.setStudentId(111);
+
+    StudentCourse course = new StudentCourse();
+    course.setCourseId(222);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(List.of(course));
+    detail.setStatus("受講終了");
+
+    //findStatusがnullを返す＝ステータスが空
+    Mockito.when(statusMapper.findStatus(111, 222)).thenReturn(null);
+
+    sut.updateStudentWithCourse(detail);
+
+    verify(statusMapper, Mockito.never()).update(Mockito.any());
   }
 }
