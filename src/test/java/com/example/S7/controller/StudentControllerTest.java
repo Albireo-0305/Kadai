@@ -47,14 +47,41 @@ class StudentControllerTest {
   @Test
   @DisplayName("受講生詳細の一覧検索テスト 　　ステータス指定なし")
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
-    when(service.searchStudentList()).thenReturn(List.of(new StudentDetail()));
+    when(service.searchStudentList(null)).thenReturn(List.of(new StudentDetail()));
 
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
         .andExpect(content().json("[{\"student\":null,\"studentCourseList\":null}]"));
 
-    verify(service, times(1)).searchStudentList();
+    verify(service, times(1)).searchStudentList(null);
   }
+
+  @Test
+  void 受講生詳細の一覧検索_ステータス仮申込で絞り込み() throws Exception {
+    StudentDetail detail = new StudentDetail();
+    detail.setStatus("仮申込");
+
+    when(service.searchStudentList("仮申込")).thenReturn(List.of(detail));
+
+    mockMvc.perform(get("/studentList").param("status", "仮申込"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].status").value("仮申込"));
+
+    verify(service, times(1)).searchStudentList("仮申込");
+  }
+
+  //異常系テスト
+  @Test
+  void 存在しないステータスで検索すると空リストが返る() throws Exception {
+    when(service.searchStudentList("存在しない")).thenReturn(List.of());
+
+    mockMvc.perform(get("/studentList").param("status", "存在しない"))
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+
+    verify(service, times(1)).searchStudentList("存在しない");
+  }
+
 
   @Test
   void 受講生詳細の受講生で適切な値を入力した時に入力チェックに異常が発生しないこと() {

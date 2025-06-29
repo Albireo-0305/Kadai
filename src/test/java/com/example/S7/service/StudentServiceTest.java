@@ -54,7 +54,7 @@ class StudentServiceTest {
     when(repository.getAllStudentsCourses()).thenReturn(studentCourseList);
 
     //実行
-    List<StudentDetail> actual = sut.searchStudentList();
+    List<StudentDetail> actual = sut.searchStudentList(null);
 
     //検証
     verify(repository, times(1)).search();
@@ -64,6 +64,41 @@ class StudentServiceTest {
     //後処理   verify(repository,times(1)).getAllStudentsCourses();
     //ここでDBをもとに戻す
   }
+
+  @Test
+  void searchStudentList_ステータスがnullなら全件を返す() {
+    StudentDetail d1 = new StudentDetail();
+    StudentDetail d2 = new StudentDetail();
+
+    Mockito.when(repository.search()).thenReturn(List.of());
+    Mockito.when(repository.getAllStudentsCourses()).thenReturn(List.of());
+    Mockito.when(converter.convertStudentDetails(Mockito.any(), Mockito.any()))
+        .thenReturn(List.of(d1, d2));
+
+    List<StudentDetail> result = sut.searchStudentList(null);
+
+    Assertions.assertEquals(2, result.size());
+  }
+
+  //異常系テスト
+  @Test
+  void searchStudentList_存在しないステータスなら空が返る() {
+    StudentDetail s1 = new StudentDetail();
+    s1.setStatus("受講中");
+
+    //空のリストを返す想定（検索結果なし）
+    Mockito.when(repository.search()).thenReturn(List.of());
+    Mockito.when(repository.getAllStudentsCourses()).thenReturn(List.of());
+
+    // コンバーターも空リストを返す
+    Mockito.when(converter.convertStudentDetails(Mockito.any(), Mockito.any()))
+        .thenReturn(List.of(s1));
+
+    List<StudentDetail> result = sut.searchStudentList("未登録");
+
+    Assertions.assertTrue(result.isEmpty());
+  }
+
 
   @Test
   void insertStudent_正しくリポジトリに登録されること() {

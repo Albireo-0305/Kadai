@@ -49,12 +49,15 @@ public class StudentController {
   /**
    * 受講生の全件一覧を取得します。
    *
+   * @param status 申込状況（仮申込・本申込・受講中・受講終了）での絞り込み
    * @return 受講生のリスト
    */
   @Operation(summary = "一覧検索", description = "受講生の一覧を検索します。")
   @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList() {
-    return service.searchStudentList();
+  public List<StudentDetail> getStudentList(
+      @RequestParam(name = "status", required = false) String status
+  ) {
+    return service.searchStudentList(status);
   }
 
   /**
