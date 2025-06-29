@@ -12,9 +12,9 @@ import lombok.Setter;
 @Setter
 public class StudentCourse {
 
-  public String courseId;
+  public int courseId;
 
-  public String studentId;
+  public int studentId;
 
   @NotBlank(message = "コース名を入力してください。")
   public String courseName;

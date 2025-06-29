@@ -61,7 +61,7 @@ class StudentRepositoryTest {
   @Test
   void コースを登録できること() {
     StudentCourse course = new StudentCourse();
-    course.setStudentId("1");
+    course.setStudentId(1);
     course.setCourseName("闇のゲーム理論");
     course.setStartDate(new Date());
     course.setExpectedEndDate(new Date());
@@ -116,7 +116,7 @@ class StudentRepositoryTest {
   @Test
   void 存在しないIDを更新しようとした時に更新件数が0件になること() {
     Student student = new Student();
-    student.setStudentId("9999");
+    student.setStudentId(9999);
     student.setName("切札　勝舞");
     student.setNickName("しょうちゃん");
     student.setEmailAddress("duel@masters.com");

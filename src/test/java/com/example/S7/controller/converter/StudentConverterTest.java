@@ -24,7 +24,7 @@ public class StudentConverterTest {
   @Test
   public void 変換結果が返ってきてコースリストが空であることをチェックする() {
     Student s1 = new Student();
-    s1.setStudentId("1");
+    s1.setStudentId(1);
     s1.setName("武藤 遊戯");
     s1.setFurigana("むとう  ゆうぎ");
     s1.setNickName("遊戯王");
@@ -36,7 +36,7 @@ public class StudentConverterTest {
     s1.setDeleted(false);
 
     Student s2 = new Student();
-    s2.setStudentId("2");
+    s2.setStudentId(2);
     s2.setName("遊城 十代");
     s2.setFurigana("ゆうき　じゅうだい");
     s2.setNickName("ガッチャ");
@@ -48,7 +48,7 @@ public class StudentConverterTest {
     s2.setDeleted(false);
 
     Student s3 = new Student();
-    s3.setStudentId("3");
+    s3.setStudentId(3);
     s3.setName("不動 遊星");
     s3.setFurigana("ふどう　ゆうせい");
     s3.setNickName("ダニエル");
@@ -80,7 +80,7 @@ public class StudentConverterTest {
     StudentConverter converter = new StudentConverter();
 
     Student student = new Student();
-    student.setStudentId("4");
+    student.setStudentId(4);
     student.setName("九十九遊馬");
     student.setFurigana("つくも　ゆうま");
     student.setNickName("先生");
@@ -95,8 +95,8 @@ public class StudentConverterTest {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     StudentCourse course = new StudentCourse();
-    course.setCourseId("4");
-    course.setStudentId("4");
+    course.setCourseId(4);
+    course.setStudentId(4);
     course.setCourseName("特殊カード変質理論");
     course.setStartDate(sdf.parse("2011-04-10T15:00:00.000+00:00"));
     course.setExpectedEndDate(sdf.parse("2014-03-22T15:00:00.000+00:00"));

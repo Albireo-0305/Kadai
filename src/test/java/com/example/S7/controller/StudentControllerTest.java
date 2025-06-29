@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -17,6 +18,7 @@ import com.example.S7.data.Student;
 import com.example.S7.data.StudentCourse;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.service.StudentService;
+import com.jayway.jsonpath.JsonPath;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -43,7 +45,7 @@ class StudentControllerTest {
   private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
   @Test
-  @DisplayName("受講生詳細の一覧検索テスト")
+  @DisplayName("受講生詳細の一覧検索テスト 　　ステータス指定なし")
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
     when(service.searchStudentList()).thenReturn(List.of(new StudentDetail()));
 
@@ -55,27 +57,9 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の受講生でIDに数字以外を用いた時に入力チェックに掛かること() {
-    Student student = new Student();
-    student.setStudentId("テストです。");
-    student.setName("江並公史");
-    student.setFurigana("えなみこうじ");
-    student.setNickName("エナミ");
-    student.setEmailAddress("test@example.com");
-
-    Set<ConstraintViolation<Student>> violations = validator.validate(student);
-
-    assertThat(violations.size()).isEqualTo(1);
-    assertThat(violations)
-        .extracting("message")
-        .containsOnly("数字のみを入力してください。");
-
-  }
-
-  @Test
   void 受講生詳細の受講生で適切な値を入力した時に入力チェックに異常が発生しないこと() {
     Student student = new Student();
-    student.setStudentId("1");
+    student.setStudentId(1);
     student.setName("江並公史");
     student.setFurigana("えなみこうじ");
     student.setNickName("エナミ");
@@ -92,7 +76,7 @@ class StudentControllerTest {
   void 受講生登録APIが200を返しデータを返すこと() throws Exception {
     StudentDetail detail = new StudentDetail();
     Student student = new Student();
-    student.setStudentId("7");
+    student.setStudentId(7);
     student.setName("王道 遊我");
     detail.setStudent(student);
 
@@ -103,7 +87,7 @@ class StudentControllerTest {
             .content("""
                   {
                     "student": {
-                      "studentId": "7",
+                      "studentId": 7,
                       "name": "王道 遊我",
                       "furigana": "おうどう ゆうが",
                       "nickName": "ゴーハの革命児",
@@ -116,26 +100,28 @@ class StudentControllerTest {
                     },
                     "studentCourseList": [
                       {
-                        "courseId": "7",
-                        "studentId": "7",
+                        "courseId": 7,
+                        "studentId": 7,
                         "courseName": "ラッシュ学部",
                         "startDate": "2025-04-01T00:00:00.000+09:00",
                         "expectedEndDate": "2026-03-31T00:00:00.000+09:00"
                       }
                     ]
+                  }
                 """))
         .andExpect(status().isOk());
   }
+
 
   //editStudent/{id} のGET（詳細取得）
   @Test
   void 指定IDでの受講生取得APIが200を返すこと() throws Exception {
     Student student = new Student();
-    student.setStudentId("3");
+    student.setStudentId(3);
     student.setName("不動 遊星");
 
     StudentCourse course = new StudentCourse();
-    course.setCourseId("999");
+    course.setCourseId(999);
 
     when(service.findStudentById(3)).thenReturn(student);
     when(service.findCourseByStudentId(3)).thenReturn(course);
@@ -153,7 +139,7 @@ class StudentControllerTest {
             .content("""
                 {
                   "student": {
-                    "studentId": "4",
+                    "studentId": 4,
                     "name": "九十九 遊馬",
                     "furigana": "つくも ゆうま",
                     "nickName": "先生",
@@ -164,7 +150,15 @@ class StudentControllerTest {
                     "remark": "",
                     "deleted": false
                   },
-                  "studentCourseList": []
+                  "studentCourseList": [
+                  {
+                   "courseId": 10,
+                   "studentId": 4,
+                   "courseName": "ラッシュ学部",
+                   "startDate": "2025-04-01",
+                   "expectedEndDate": "2026-03-31"
+                    }
+                                            ]
                 }
                 """))
         .andExpect(status().isOk())

@@ -113,13 +113,14 @@ public class StudentService {
       StudentCourse course = courses.get(0);
       repository.updateCourse(course);
 
-      //ステータスの更新
+      // ステータスの更新（null & 空文字チェックあり）
       ApplicationStatus status = statusMapper.findStatus(
           student.getStudentId(),
           course.getCourseId()
       );
 
-      if (status != null) {
+      if (status != null && studentDetail.getStatus() != null && !studentDetail.getStatus()
+          .isEmpty()) {
         status.setStatus(studentDetail.getStatus());
         statusMapper.update(status);
       }
