@@ -34,10 +34,25 @@ public class StudentService {
   /**
    * 受講生の全件一覧を取得します。
    */
-  public List<StudentDetail> searchStudentList() {
-    List<Student> studentList = repository.search();
-    List<StudentCourse> studentCourseList = repository.getAllStudentsCourses();
-    return converter.convertStudentDetails(studentList, studentCourseList);
+  public List<StudentDetail> searchStudentList(String status,String name,String furigana,String emailAddress) {
+    List<Student> students = repository.search();
+    List<StudentCourse> courses = repository.getAllStudentsCourses();
+
+    //受講生とコースをStudentDetailに変換する
+    List<StudentDetail> allDetails = converter.convertStudentDetails(students,courses );
+
+    // status が空や null の場合は全件返す
+    if (status == null || status.isEmpty()) {
+      return allDetails;
+    }
+
+    // status が指定されている場合は絞り込み
+    return allDetails.stream()
+        .filter(d->status==null||status.equals(d.getStatus()))
+        .filter(d->name==null||(d.getStudent().getName()!=null && d.getStudent().getName().contains(name)))
+        .filter(d->furigana==null||(d.getStudent().getFurigana()!=null && d.getStudent().getFurigana().contains(furigana)))
+        .filter(d->emailAddress==null||(d.getStudent().getEmailAddress()!=null && d.getStudent().getEmailAddress().equals(emailAddress)))
+        .toList();
   }
 
   /**
