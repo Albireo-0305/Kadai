@@ -55,9 +55,12 @@ public class StudentController {
   @Operation(summary = "一覧検索", description = "受講生の一覧を検索します。")
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList(
-      @RequestParam(name = "status", required = false) String status
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false)String name,
+      @RequestParam(required = false)String furigana,
+      @RequestParam(required = false)String emailAddress
   ) {
-    return service.searchStudentList(status);
+    return service.searchStudentList(status,name,furigana,emailAddress);
   }
 
   /**

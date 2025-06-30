@@ -47,13 +47,13 @@ class StudentControllerTest {
   @Test
   @DisplayName("受講生詳細の一覧検索テスト 　　ステータス指定なし")
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
-    when(service.searchStudentList(null)).thenReturn(List.of(new StudentDetail()));
+    when(service.searchStudentList(null,null,null,null)).thenReturn(List.of(new StudentDetail()));
 
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
         .andExpect(content().json("[{\"student\":null,\"studentCourseList\":null}]"));
 
-    verify(service, times(1)).searchStudentList(null);
+    verify(service, times(1)).searchStudentList(null,null,null,null);
   }
 
   @Test
@@ -61,25 +61,74 @@ class StudentControllerTest {
     StudentDetail detail = new StudentDetail();
     detail.setStatus("仮申込");
 
-    when(service.searchStudentList("仮申込")).thenReturn(List.of(detail));
+    when(service.searchStudentList("仮申込",null,null,null)).thenReturn(List.of(detail));
 
     mockMvc.perform(get("/studentList").param("status", "仮申込"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].status").value("仮申込"));
 
-    verify(service, times(1)).searchStudentList("仮申込");
+    verify(service, times(1)).searchStudentList("仮申込",null,null,null);
+  }
+
+  @Test
+  void 名前で検索できること()throws Exception{
+    Student student = new Student();
+    student.setName("不動 遊星");
+    StudentDetail detail =new StudentDetail();
+    detail.setStudent(student);
+
+    when(service.searchStudentList(null,"不動",null,null)).thenReturn(List.of(detail));
+
+    mockMvc.perform(get("/studentList").param("name","不動"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].student.name").value("不動 遊星"));
+
+    verify(service).searchStudentList(null,"不動",null,null);
+  }
+
+  @Test
+  void フリガナとメールアドレスで検索できること() throws Exception {
+    Student student = new Student();
+    student.setFurigana("ふどう ゆうせい");
+    student.setEmailAddress("yusei@example.com");
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+
+    when(service.searchStudentList(null, null, "ふどう ゆうせい", "yusei@example.com"))
+        .thenReturn(List.of(detail));
+
+    mockMvc.perform(get("/studentList")
+            .param("furigana", "ふどう ゆうせい")
+            .param("emailAddress", "yusei@example.com"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].student.furigana").value("ふどう ゆうせい"))
+        .andExpect(jsonPath("$[0].student.emailAddress").value("yusei@example.com"));
+
+    verify(service).searchStudentList(null, null, "ふどう ゆうせい", "yusei@example.com");
   }
 
   //異常系テスト
   @Test
   void 存在しないステータスで検索すると空リストが返る() throws Exception {
-    when(service.searchStudentList("存在しない")).thenReturn(List.of());
+    when(service.searchStudentList("存在しない",null,null,null)).thenReturn(List.of());
 
     mockMvc.perform(get("/studentList").param("status", "存在しない"))
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
 
-    verify(service, times(1)).searchStudentList("存在しない");
+    verify(service, times(1)).searchStudentList("存在しない",null,null,null);
+  }
+
+  @Test
+  void 存在しない名前なら空リストが返る() throws Exception {
+    when(service.searchStudentList(null, "城之内くん", null, null)).thenReturn(List.of());
+
+    mockMvc.perform(get("/studentList").param("name", "城之内くん"))
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+
+    verify(service).searchStudentList(null, "城之内くん", null, null);
   }
 
 
