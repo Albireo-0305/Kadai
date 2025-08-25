@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.S7.repository.ApplicationStatusMapper">
+
+  <select id="findStatus" resultType="com.example.S7.ApplicationStatus">
+    SELECT * FROM application_statuses
+    WHERE student_id = #{studentId} AND course_id = #{courseId}
+  </select>
+
+  <select id="findAll" resultType="com.example.S7.ApplicationStatus">
+    SELECT * FROM application_statuses
+  </select>
+
+  <insert id="insert" parameterType="com.example.S7.ApplicationStatus">
+    INSERT INTO application_statuses(student_id, course_id, status)
+    VALUES (#{studentId}, #{courseId}, #{status})
+  </insert>
+
+  <update id="update" parameterType="com.example.S7.ApplicationStatus">
+    UPDATE application_statuses
+    SET status = #{status}
+    WHERE student_id = #{studentId} AND course_id = #{courseId}
+  </update>
+
+</mapper>
