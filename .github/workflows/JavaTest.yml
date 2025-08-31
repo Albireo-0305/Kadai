@@ -8,7 +8,7 @@ on:
 env:
   EC2_USER: 'ec2-user'
   EC2_HOST: '57.180.29.201'
-  SRC_PATH: 'build/libs/*.jar'
+  SRC_PATH: 'build/libs/S7-0.0.1-SNAPSHOT.jar'
   DEST_PATH: '/home/ec2-user/Kadai.jar'
 
 jobs:
