@@ -39,7 +39,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key $EC2_USER@$EC2_HOST:$DEST_PATH
+          scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH $EC2_USER@$EC2_HOST:$DEST_PATH
           
       - name: SSH Application Deploy
         uses: appleboy/ssh-action@master
@@ -53,7 +53,7 @@ jobs:
             if [ -f /etc/systemd/system/Kadai.service ]; then
               echo "already exists Service File"
             else
-            cat <<EDL | sudo tee -a /etc/systemd/Kadai.service
+            cat <<EOL | sudo tee -a /etc/systemd/system/Kadai.service
             [Unit]
             Description = Kadai App
             
@@ -71,7 +71,7 @@ jobs:
             EOL
             fi
             
-            sudo systemctl demon-reload
+            sudo systemctl daemon-reload
             if sudo systemctl status Kadai 2>&1 | grep "Active (running)" ; then
               sudo systemctl restart Kadai
             else
