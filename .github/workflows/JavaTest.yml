@@ -40,7 +40,7 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH $EC2_USER@$EC2_HOST:$DEST_PATH
-          
+
       - name: SSH Application Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -53,25 +53,25 @@ jobs:
             if [ -f /etc/systemd/system/Kadai.service ]; then
               echo "already exists Service File"
             else
-            cat <<EOL | sudo tee /etc/systemd/system/Kadai.service
+            cat <<EOL | sudo tee /etc/systemd/system/Kadai.service > /dev/null
             [Unit]
             Description=Kadai App
             After=network.target
-  
-           [Service]
-           ExecStart=/usr/bin/java -jar /home/ec2-user/Kadai.jar
-           EnvironmentFile=/etc/sysconfig/Kadai
-           Restart=on-failure
-           RestartSec=10
-           Type=simple
-           User=ec2-user
-           Group=ec2-user
-           SuccessExitStatus=143
-
-           [Install]
-           WantedBy=multi-user.target  
-           EOL
-           fi
+            
+            [Service]
+            ExecStart=/usr/bin/java -jar /home/ec2-user/Kadai.jar
+            EnvironmentFile=/etc/sysconfig/Kadai
+            Restart=on-failure
+            RestartSec=10
+            Type=simple
+            User=ec2-user
+            Group=ec2-user
+            SuccessExitStatus=143
+            
+            [Install]
+            WantedBy=multi-user.target  
+            EOL
+            fi
             
             sudo systemctl daemon-reload
             if sudo systemctl status Kadai 2>&1 | grep "Active (running)" ; then
