@@ -1,18 +1,19 @@
-name: Java CI with Gradle
+name: Java CD with Gradle
 
 on:
   push:
     branches: ["S10_Kadai", "createGitHubActions"]
   pull_request:
     branches: ["S10_Kadai", "createGitHubActions"]
+env:
+  EC2_USER: 'ec2-user'
+  EC2_HOST: '57.180.29.201'
+  SRC_PATH: 'build/libs/*.jar'
+  DEST_PATH: '/home/ec2-user/Kadai.jar'
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -27,8 +28,54 @@ jobs:
       - name: Make Gradle Wrapper executable
         run: chmod +x gradlew
 
-      - name: Build with Gradle Wrapper
+      - name: Test with Gradle Wrapper
         run: ./gradlew test
 
+      - name: Build with Gradle Wrapper
+        run: ./gradlew bootJar
+
+      - name: SCP Copy Application to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          scp -o StrictHostKeyChecking=no -i private_key $EC2_USER@$EC2_HOST:$DEST_PATH
+          
+      - name: SSH Application Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          envs: DEST_PATH
+          script: |
+            sudo yum update -y
+            if [ -f /etc/systemd/system/Kadai.service ]; then
+              echo "already exists Service File"
+            else
+            cat <<EDL | sudo tee -a /etc/systemd/Kadai.service
+            [Unit]
+            Description = Kadai App
+            
+            [Service]
+            ExecStart = java -jar ${DEST_PATH}
+            EnvironmentFile = /etc/sysconfig/Kadai
+            Restart = no
+            Type = simple
+            User = ec2-user
+            Group = ec2-user
+            SuccessExitStatus = 143
+            
+            [Install]
+            WantedBy =multi-user.target
+            EOL
+            fi
+            
+            sudo systemctl demon-reload
+            if sudo systemctl status Kadai 2>&1 | grep "Active (running)" ; then
+              sudo systemctl restart Kadai
+            else
+              sudo systemctl start Kadai
+            fi
 
 
