@@ -7,8 +7,8 @@ on:
     branches: ["S10_Kadai", "createGitHubActions"]
 env:
   EC2_USER: 'ec2-user'
-  EC2_HOST: '57.180.29.201'
-  SRC_PATH: 'build/libs/S7-0.0.1-SNAPSHOT.jar'
+  EC2_HOST: '52.198.13.150'
+  SRC_PATH: 'build/libs/*.jar'
   DEST_PATH: '/home/ec2-user/Kadai.jar'
 
 jobs:
@@ -56,25 +56,23 @@ jobs:
             cat <<EOL | sudo tee /etc/systemd/system/Kadai.service > /dev/null
             [Unit]
             Description=Kadai App
-            After=network.target
             
             [Service]
-            ExecStart=/usr/bin/java -jar /home/ec2-user/Kadai.jar
+            ExecStart = java -jar ${DEST_PATH}
             EnvironmentFile=/etc/sysconfig/Kadai
-            Restart=on-failure
-            RestartSec=10
+            Restart= no
             Type=simple
-            User=ec2-user
-            Group=ec2-user
-            SuccessExitStatus=143
+            User = ec2-user
+            Group = ec2-user
+            SuccessExitStatus = 143
             
             [Install]
-            WantedBy=multi-user.target  
+            WantedBy = multi-user.target  
             EOL
             fi
             
             sudo systemctl daemon-reload
-            if sudo systemctl status Kadai 2>&1 | grep "Active (running)" ; then
+            if sudo systemctl status Kadai 2>&1 | grep "Active: active(running)" ; then
               sudo systemctl restart Kadai
             else
             sudo systemctl start Kadai
