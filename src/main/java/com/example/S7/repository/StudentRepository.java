@@ -22,7 +22,7 @@ public interface StudentRepository {
 
   void insertCourse(StudentCourse course);
 
-  void updateStudent(Student student);
+  int updateStudent(Student student);
 
   void updateCourse(StudentCourse course);
 }

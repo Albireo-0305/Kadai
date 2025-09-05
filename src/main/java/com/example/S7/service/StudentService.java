@@ -1,16 +1,16 @@
 package com.example.S7.service;
 
+import com.example.S7.ApplicationStatus;
 import com.example.S7.controller.converter.StudentConverter;
 import com.example.S7.data.Student;
 import com.example.S7.data.StudentCourse;
 import com.example.S7.domain.StudentDetail;
 import com.example.S7.exception.StudentNotFoundException;
+import com.example.S7.repository.ApplicationStatusMapper;
 import com.example.S7.repository.StudentRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 /**
@@ -19,22 +19,40 @@ import java.util.List;
 @Service
 public class StudentService {
 
+  private final ApplicationStatusMapper statusMapper;
   private final StudentRepository repository;
   private final StudentConverter converter;
 
   @Autowired
-  public StudentService(StudentRepository repository, StudentConverter converter) {
+  public StudentService(StudentRepository repository, StudentConverter converter,
+      ApplicationStatusMapper statusMapper) {
     this.repository = repository;
     this.converter = converter;
+    this.statusMapper = statusMapper;
   }
 
   /**
    * 受講生の全件一覧を取得します。
    */
-  public List<StudentDetail> searchStudentList() {
-    List<Student> studentList = repository.search();
-    List<StudentCourse> studentCourseList = repository.getAllStudentsCourses();
-    return converter.convertStudentDetails(studentList, studentCourseList);
+  public List<StudentDetail> searchStudentList(String status,String name,String furigana,String emailAddress) {
+    List<Student> students = repository.search();
+    List<StudentCourse> courses = repository.getAllStudentsCourses();
+
+    //受講生とコースをStudentDetailに変換する
+    List<StudentDetail> allDetails = converter.convertStudentDetails(students,courses );
+
+    // status が空や null の場合は全件返す
+    if (status == null || status.isEmpty()) {
+      return allDetails;
+    }
+
+    // status が指定されている場合は絞り込み
+    return allDetails.stream()
+        .filter(d->status==null||status.equals(d.getStatus()))
+        .filter(d->name==null||(d.getStudent().getName()!=null && d.getStudent().getName().contains(name)))
+        .filter(d->furigana==null||(d.getStudent().getFurigana()!=null && d.getStudent().getFurigana().contains(furigana)))
+        .filter(d->emailAddress==null||(d.getStudent().getEmailAddress()!=null && d.getStudent().getEmailAddress().equals(emailAddress)))
+        .toList();
   }
 
   /**
@@ -47,7 +65,7 @@ public class StudentService {
   }
 
   /**
-   * 学生とコースを同時に登録します。
+   * 学生とコース、申し込み状況を同時に登録します。
    */
   @Transactional
   public StudentDetail insertStudentWithCourse(StudentDetail studentDetail) {
@@ -59,6 +77,16 @@ public class StudentService {
       StudentCourse course = courses.get(0);
       course.setStudentId(student.getStudentId());
       repository.insertCourse(course);
+
+      //申込状況の登録
+      String statusValue = studentDetail.getStatus();
+      if (statusValue != null && !statusValue.isEmpty()) {
+        ApplicationStatus status = new ApplicationStatus();
+        status.setStudentId(student.getStudentId());
+        status.setCourseId(course.getCourseId());
+        status.setStatus(studentDetail.getStatus());
+        statusMapper.insert(status);
+      }
     }
 
     return studentDetail;
@@ -70,7 +98,21 @@ public class StudentService {
   public StudentDetail findStudentDetailById(int studentId) {
     Student student = repository.findStudentById(studentId);
     List<StudentCourse> courses = repository.findCoursesByStudentId(studentId);
-    return new StudentDetail(student, courses);
+
+    String statusValue = null;
+    if (!courses.isEmpty()) {
+      int courseId = courses.get(0).getCourseId();
+      ApplicationStatus status = statusMapper.findStatus(studentId, courseId);
+      if (status != null) {
+        statusValue = status.getStatus();
+      }
+    }
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(courses);
+    detail.setStatus(statusValue);
+    return detail;
   }
 
   /**
@@ -85,6 +127,18 @@ public class StudentService {
     if (courses != null && !courses.isEmpty()) {
       StudentCourse course = courses.get(0);
       repository.updateCourse(course);
+
+      // ステータスの更新（null & 空文字チェックあり）
+      ApplicationStatus status = statusMapper.findStatus(
+          student.getStudentId(),
+          course.getCourseId()
+      );
+
+      if (status != null && studentDetail.getStatus() != null && !studentDetail.getStatus()
+          .isEmpty()) {
+        status.setStatus(studentDetail.getStatus());
+        statusMapper.update(status);
+      }
     }
   }
 
@@ -99,17 +153,8 @@ public class StudentService {
     return student;
   }
 
-
-  /**
-   * 学生に紐づくコース情報を1件取得します。
-   */
   public StudentCourse findCourseByStudentId(int studentId) {
     return repository.findCourseByStudentId(studentId);
   }
 
 }
-
-//リファクタリング箇所
-//insertStudentWithCourseでinsertStudentを呼び出すようにしてControllerで両方呼んでいたのをサービス側で1つにまとめてみました。
-
-//private finalを使いました。コンストラクタで注入されるフィールドは基本的に変更しないそうなので
